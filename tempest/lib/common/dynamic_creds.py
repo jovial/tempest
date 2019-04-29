@@ -64,6 +64,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
     :param identity_admin_endpoint_type: The endpoint type for identity
                                          admin clients. Defaults to public.
     :param identity_uri: Identity URI of the target cloud
+    :param quotas: key pair mapping of name to limit
     """
 
     def __init__(self, identity_version, name=None, network_resources=None,
@@ -73,7 +74,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                  neutron_available=False, create_networks=True,
                  project_network_cidr=None, project_network_mask_bits=None,
                  public_network_id=None, resource_prefix=None,
-                 identity_admin_endpoint_type='public', identity_uri=None):
+                 identity_admin_endpoint_type='public', identity_uri=None,
+                 quotas=None):
         super(DynamicCredentialProvider, self).__init__(
             identity_version=identity_version, identity_uri=identity_uri,
             admin_role=admin_role, name=name,
@@ -102,7 +104,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
          self.routers_admin_client,
          self.subnets_admin_client,
          self.ports_admin_client,
-         self.security_groups_admin_client) = self._get_admin_clients(
+         self.security_groups_admin_client,
+         self.quotas_client) = self._get_admin_clients(
             identity_admin_endpoint_type)
         # Domain where isolated credentials are provisioned (v3 only).
         # Use that of the admin account is None is configured.
@@ -118,6 +121,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.roles_admin_client,
             self.domains_admin_client,
             self.creds_domain_name)
+        self.quotas = quotas
 
     def _get_admin_clients(self, endpoint_type):
         """Returns a tuple with instances of the following admin clients
@@ -138,7 +142,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.network.RoutersClient(),
                     os.network.SubnetsClient(),
                     os.network.PortsClient(),
-                    os.network.SecurityGroupsClient())
+                    os.network.SecurityGroupsClient(),
+                    os.compute.QuotasClient())
         else:
             # We use a dedicated client manager for identity client in case we
             # need a different token scope for them.
@@ -155,7 +160,8 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     os.network.RoutersClient(),
                     os.network.SubnetsClient(),
                     os.network.PortsClient(),
-                    os.network.SecurityGroupsClient())
+                    os.network.SecurityGroupsClient(),
+                    os.compute.QuotasClient())
 
     def _create_creds(self, admin=False, roles=None):
         """Create credentials with random name.
@@ -193,6 +199,10 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     self.identity_admin_domain_scope):
                 self.creds_client.assign_user_role_on_domain(
                     user, self.identity_admin_role)
+        if quotas:
+            self.quotas_client.update_quota_set(
+                tenant_id=project, user_id=user, **self.quotas
+            )
         # Add roles specified in config file
         for conf_role in self.extra_roles:
             self.creds_client.assign_user_role(user, project, conf_role)

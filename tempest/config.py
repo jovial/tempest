@@ -1124,6 +1124,9 @@ or
  $ python -m testtools.run TEST_ID"""),
 ]
 
+compute_quotas_group = cfg.OptGroup(name='compute_quotas',
+                                    title="Free form resource to limit mappings")
+
 _opts = [
     (auth_group, AuthGroup),
     (compute_group, ComputeGroup),
@@ -1145,6 +1148,7 @@ _opts = [
     (debug_group, DebugGroup),
     (placement_group, PlacementGroup),
     (profiler_group, ProfilerGroup),
+    (compute_quotas_group, []),
     (None, DefaultGroup)
 ]
 
