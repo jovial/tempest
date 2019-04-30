@@ -75,7 +75,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                  project_network_cidr=None, project_network_mask_bits=None,
                  public_network_id=None, resource_prefix=None,
                  identity_admin_endpoint_type='public', identity_uri=None,
-                 quotas=None):
+                 compute_quotas=None):
         super(DynamicCredentialProvider, self).__init__(
             identity_version=identity_version, identity_uri=identity_uri,
             admin_role=admin_role, name=name,
@@ -121,7 +121,7 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
             self.roles_admin_client,
             self.domains_admin_client,
             self.creds_domain_name)
-        self.quotas = quotas
+        self.compute_quotas = compute_quotas
 
     def _get_admin_clients(self, endpoint_type):
         """Returns a tuple with instances of the following admin clients
@@ -199,9 +199,11 @@ class DynamicCredentialProvider(cred_provider.CredentialProvider):
                     self.identity_admin_domain_scope):
                 self.creds_client.assign_user_role_on_domain(
                     user, self.identity_admin_role)
-        if quotas:
+        if self.compute_quotas:
+            quotas = {k:v for k,v in self.compute_quotas.items() if v}
+            # FIXME: setting user_id does not seem to work
             self.quotas_client.update_quota_set(
-                tenant_id=project, user_id=user, **self.quotas
+                tenant_id=project["id"], user_id=None, **quotas
             )
         # Add roles specified in config file
         for conf_role in self.extra_roles:

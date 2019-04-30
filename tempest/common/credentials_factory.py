@@ -88,7 +88,7 @@ def get_dynamic_provider_params(identity_version, admin_creds=None):
                              CONF.network.shared_physical_network)),
         ('resource_prefix', 'tempest'),
         ('identity_admin_endpoint_type', endpoint_type),
-        ('quotas', CONF.quotas),
+        ('compute_quotas', CONF.compute_quotas),
     ]))
 
 

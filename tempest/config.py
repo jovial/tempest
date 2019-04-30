@@ -1125,7 +1125,40 @@ or
 ]
 
 compute_quotas_group = cfg.OptGroup(name='compute_quotas',
-                                    title="Free form resource to limit mappings")
+                                    title="Dynamic User Compute Quotas")
+ComputeQuotaGroup = [
+    cfg.IntOpt('cores',
+               help="Number of instance cores (VCPUs) allowed per project."),
+    cfg.IntOpt('fixed-ips',
+               help="Number of fixed IP addresses allowed per project. This" 
+                    "number must be equal to or greater than the number of" 
+                    "allowed instances."),
+    cfg.IntOpt('floating-ips',
+               help="Number of floating IP addresses allowed per project."),
+    cfg.IntOpt('injected-file-content-bytes',
+               help="Number of content bytes allowed per injected file."),
+    cfg.IntOpt('injected-file-path-bytes',
+               help="Length of injected file path."),
+    cfg.IntOpt('injected-files',
+               help="Number of injected files allowed per project."),
+    cfg.IntOpt('instances',
+               help="Number of instances allowed per project."),
+    cfg.IntOpt('key-pairs',
+               help="Number of key pairs allowed per user."),
+    cfg.IntOpt('metadata-items',
+               help="Number of metadata items allowed per instance."),
+    cfg.IntOpt('ram',
+               help="Megabytes of instance ram allowed per project."),
+    cfg.IntOpt('security-groups',
+               help="Number of security groups per project."),
+    cfg.IntOpt('security-group-rules',
+               help="Number of security group rules per project."),
+    cfg.IntOpt('server-groups',
+               help="Number of server groups per project."),
+    cfg.IntOpt('server-group-members',
+               help="Number of servers per server group.")
+]
+
 
 _opts = [
     (auth_group, AuthGroup),
@@ -1148,7 +1181,7 @@ _opts = [
     (debug_group, DebugGroup),
     (placement_group, PlacementGroup),
     (profiler_group, ProfilerGroup),
-    (compute_quotas_group, []),
+    (compute_quotas_group, ComputeQuotaGroup),
     (None, DefaultGroup)
 ]
 
