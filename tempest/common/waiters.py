@@ -12,6 +12,7 @@
 
 import re
 import time
+from subprocess import Popen, PIPE
 
 from oslo_log import log as logging
 
@@ -127,6 +128,25 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
             raise lib_exc.TimeoutException
         old_status = server_status
         old_task_state = task_state
+    wait_for_ironic_termination(client)
+
+
+def wait_for_ironic_termination(client):
+    """Waits for server to reach termination."""
+    timeout = 1200
+    start_time = int(time.time())
+    while True:
+        time.sleep(client.build_interval)
+        process = Popen(["/home/centos/node-count.sh"], stdout=PIPE)
+        (output, err) = process.communicate()
+        exit_code = process.wait()
+        # HACK
+        elapsed = int(time.time()) - start_time
+        if exit_code == 0:
+            LOG.info("waited {} for ironic nodes".format(elapsed))
+            return
+        if elapsed >= timeout:
+            raise lib_exc.TimeoutException
 
 
 def wait_for_image_status(client, image_id, status):
