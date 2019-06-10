@@ -113,7 +113,6 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
         try:
             body = client.show_server(server_id)['server']
         except lib_exc.NotFound:
-            wait_for_ironic_termination(client)
             return
         server_status = body['status']
         task_state = _get_task_state(body)
