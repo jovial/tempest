@@ -364,6 +364,11 @@ ComputeGroup = [
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
                     "with format 'X.Y' or string 'latest'"),
+    cfg.StrOpt('pre_create_hook',
+               default=None,
+               help="Path to an executable. This should return the status"
+                    "code: zero, if there is sufficient capacity to boot"
+                    "a server"),
 ]
 
 placement_group = cfg.OptGroup(name='placement',

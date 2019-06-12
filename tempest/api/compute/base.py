@@ -237,8 +237,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
             not tenant_network):
             kwargs['networks'] = 'none'
 
-        waiters.wait_for_ironic_termination(cls.servers_client)
-
         body, servers = compute.create_test_server(
             cls.os_primary,
             validatable,
@@ -398,8 +396,6 @@ class BaseV2ComputeTest(api_version_utils.BaseMicroversionTest,
         """
         if server_id:
             cls.delete_server(server_id)
-
-        waiters.wait_for_ironic_termination(cls.servers_client)
 
         cls.password = data_utils.rand_password()
         server = cls.create_test_server(

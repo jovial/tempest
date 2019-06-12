@@ -193,9 +193,14 @@ def create_test_server(clients, validatable=False, validation_resources=None,
         # to be specified.
         image_id = ''
 
-    body = clients.servers_client.create_server(name=name, imageRef=image_id,
-                                                flavorRef=flavor,
-                                                **kwargs)
+    args = kwargs.copy()
+    args["name"] = name
+    args["imageRef"] = image_id
+    args["flavorRef"] = flavor
+
+    waiters.wait_for_server_pre_create(clients.servers_client, **args)
+
+    body = clients.servers_client.create_server(**args)
 
     # handle the case of multiple servers
     if multiple_create_request:

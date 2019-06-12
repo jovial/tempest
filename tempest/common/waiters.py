@@ -12,6 +12,7 @@
 
 import re
 import time
+import json
 from subprocess import Popen, PIPE
 
 from oslo_log import log as logging
@@ -130,13 +131,16 @@ def wait_for_server_termination(client, server_id, ignore_error=False):
         old_task_state = task_state
 
 
-def wait_for_ironic_termination(client):
-    """Waits for server to reach termination."""
+def wait_for_server_pre_create(client, **args):
+    """shell script hook to determine if we can boot a server"""
+    if not CONF.compute.pre_create_hook:
+        return
     timeout = 1200
     start_time = int(time.time())
     while True:
         time.sleep(client.build_interval)
-        process = Popen(["/home/centos/node-count.sh"], stdout=PIPE)
+        server = json.dumps(args)
+        process = Popen([CONF.compute.pre_create_hook, server], stdout=PIPE)
         (output, err) = process.communicate()
         exit_code = process.wait()
         # HACK
